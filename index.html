@@ -11,7 +11,7 @@
             --bg: #0f0f14;
             --card-bg: #1b1b24;
             --neon-glow: 0 0 15px rgba(102, 204, 255, 0.4);
-            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth; }
@@ -59,8 +59,30 @@
         header h1 { font-size: clamp(2.5rem, 8vw, 4rem); line-height: 1.1; }
         header p { color: #aaa; font-size: 1.1rem; margin-top: 10px; }
 
-        section { padding: 80px 10%; opacity: 0; transform: translateY(40px); transition: 0.8s ease-out; }
-        section.show { opacity: 1; transform: translateY(0); }
+        /* --- UPDATED SCROLL ANIMATION CSS --- */
+        section { 
+            padding: 80px 10%; 
+            opacity: 0; 
+            transition: var(--transition);
+        }
+
+        /* Default Exit/Hidden State (Below the screen) */
+        section.exit-down {
+            transform: translateY(60px);
+            opacity: 0;
+        }
+
+        /* Default Exit/Hidden State (Above the screen) */
+        section.exit-up {
+            transform: translateY(-60px);
+            opacity: 0;
+        }
+
+        /* Active/Visible State */
+        section.show { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
 
         h2 { color: var(--accent); margin-bottom: 30px; font-size: 2rem; display: flex; align-items: center; gap: 15px; }
         h2::after { content: ""; height: 1px; background: var(--accent); flex: 1; opacity: 0.2; }
@@ -122,14 +144,14 @@
         </div>
     </header>
 
-    <section id="summary">
+    <section id="summary" class="exit-down">
         <h2>🧾 Summary</h2>
         <div class="bio-box">
             I am a third-year Information Technology student at <strong>USTP</strong> with a passion for web development, digital art, and creative media. I specialize in designing visually appealing interfaces and capturing meaningful moments through technology and artistic expression.
         </div>
     </section>
 
-    <section id="bio">
+    <section id="bio" class="exit-down">
         <h2>👤 Personal Details & Education</h2>
         <div class="bio-grid">
             <div class="bio-box">
@@ -160,18 +182,15 @@
 
             <div class="bio-box">
                 <h3 style="color:var(--accent); margin-bottom:15px;">Interests</h3>
-                <p><strong>Hobbies:</strong> Drawing, Gaming, Editing, Cooking, Editing</p>
-                <p><strong>Skills:</strong> Python, HTML, CSS, UI/UX Design, Digital Art, Photography, Basic Networking, Basic Database Fundamentals</p>
-                <p><strong>Art Styles:</strong>Landscape Digital Painting, Anime, Semi-Realism</p>
-                <p><strong>Favorite Food:</strong> Anything Spicy as long it is edible</p>
-                <p><strong>Favorite Music:</strong> J-Pop, Anime OP/ED, Indie-pop, Jazz, Psychedelia, Lo-fi</p>
-                <p><strong>Games:</strong> Mobile Legends, League of Legends, League of Legends: Wildrift, GTA V, Valorant, CODM, Genshin Impact, Wuthering Waves and any other games</p>
+                <p><strong>Hobbies:</strong> Drawing, Gaming, Editing, Cooking</p>
+                <p><strong>Skills:</strong> Python, HTML, CSS, UI/UX Design, Digital Art, Photography</p>
+                <p><strong>Art Styles:</strong> Landscape Digital Painting, Anime, Semi-Realism</p>
                 <p><strong>Catchphrase:</strong> <br><span style="color:var(--accent); font-style: italic;">"badeya"</span></p>
             </div>
         </div>
     </section>
 
-    <section id="art">
+    <section id="art" class="exit-down">
         <h2>🎨 Digital Art Projects</h2>
         <div class="grid">
             <div class="card"><img src="A1.png"><div class="info">Digital Artwork #1</div></div>
@@ -180,7 +199,7 @@
         </div>
     </section>
 
-    <section id="photography">
+    <section id="photography" class="exit-down">
         <h2>📸 Photography</h2>
         <div class="grid">
             <div class="card"><img src="P1.png"><div class="info">Moment Capture #1</div></div>
@@ -190,7 +209,7 @@
         </div>
     </section>
 
-    <section id="web">
+    <section id="web" class="exit-down">
         <h2>💻 Website Development</h2>
         <div class="grid">
             <div class="card">
@@ -210,7 +229,7 @@
         </div>
     </section>
 
-    <section id="contact">
+    <section id="contact" class="exit-down">
         <h2>📬 Get In Touch</h2>
         <div style="text-align: center;">
             <a href="mailto:maghanoy.renhiel765@gmail.com" class="contact-pill">Email Me</a>
@@ -230,16 +249,39 @@
     </footer>
 
     <script>
-        const observerOptions = { threshold: 0.15 };
+        const sections = document.querySelectorAll('section');
+        
+        const observerOptions = {
+            threshold: 0.1
+        };
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const rect = entry.boundingClientRect;
+                
                 if (entry.isIntersecting) {
+                    // Coming into view: Reset to center
                     entry.target.classList.add('show');
+                    entry.target.classList.remove('exit-up', 'exit-down');
+                } else {
+                    // Leaving view
+                    entry.target.classList.remove('show');
+                    
+                    // Determine if it left through the top or bottom
+                    if (rect.top < 0) {
+                        // Left through the top
+                        entry.target.classList.add('exit-up');
+                        entry.target.classList.remove('exit-down');
+                    } else {
+                        // Left through the bottom
+                        entry.target.classList.add('exit-down');
+                        entry.target.classList.remove('exit-up');
+                    }
                 }
             });
         }, observerOptions);
 
-        document.querySelectorAll('section').forEach(el => observer.observe(el));
+        sections.forEach(section => observer.observe(section));
     </script>
 
 </body>
